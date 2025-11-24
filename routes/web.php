@@ -7,6 +7,7 @@ Route::get('/', function () {
 });
 
 use App\Http\Controllers\HelloController;
+use App\Http\Controllers\AdminController;
 
 Route::get('/hello', [HelloController::class, 'index']);
 
