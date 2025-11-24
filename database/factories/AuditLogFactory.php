@@ -3,21 +3,18 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\AuditLog;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\auditLog>
- */
 class AuditLogFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = AuditLog::class;
+
+    public function definition()
     {
         return [
-            //
+            'admin_id' => 1, // or pick random admin ID if multiple
+            'action' => $this->faker->randomElement(['created_member','approved_loan','updated_saving','deleted_transaction']),
+            'details' => $this->faker->sentence(),
         ];
     }
 }

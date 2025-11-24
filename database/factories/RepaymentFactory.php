@@ -3,21 +3,19 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Repayment;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\repayment>
- */
 class RepaymentFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = Repayment::class;
+
+    public function definition()
     {
+        $amount = $this->faker->randomFloat(2, 100, 2000);
         return [
-            //
+            'amount_paid' => $amount,
+            'balance_after_payment' => $this->faker->randomFloat(2, 0, 10000),
+            'payment_date' => $this->faker->date(),
         ];
     }
 }
