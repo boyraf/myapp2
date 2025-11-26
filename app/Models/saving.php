@@ -14,9 +14,15 @@ class Saving extends Model
         'amount',
         'type',
         'balance_after',
+        'status',
         'date'
     ];
 
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+    
     public function member()
     {
         return $this->belongsTo(Member::class);

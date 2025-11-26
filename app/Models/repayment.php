@@ -13,11 +13,18 @@ class Repayment extends Model
         'loan_id',
         'amount_paid',
         'balance_after_payment',
-        'payment_date'
+        'payment_date',
+        'status'
     ];
 
+    // Each repayment belongs to one loan
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+    
     public function loan()
     {
-        return $this->belongsTo(Loan::class);
+        return $this->belongsTo(Loan::class, 'loan_id', 'id');
     }
 }

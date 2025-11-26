@@ -11,12 +11,23 @@ class AuditLog extends Model
 
     protected $fillable = [
         'admin_id',
+        'member_id',
         'action',
-        'details'
+        'table_name',
+        'record_id',
+        'old_values',
+        'new_values',
+        'details',
+        'ip_address'
     ];
 
     public function admin()
     {
-        return $this->belongsTo(Admin::class);
+        return $this->belongsTo(\App\Models\Admin::class, 'admin_id');
+    }
+
+    public function member()
+    {
+        return $this->belongsTo(\App\Models\Member::class, 'member_id');
     }
 }

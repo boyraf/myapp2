@@ -19,14 +19,18 @@ class Loan extends Model
         'due_date',
         'balance'
     ];
-
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+    
     public function member()
     {
-        return $this->belongsTo(Member::class);
+        return $this->belongsTo(Member::class, 'member_id', 'id');
     }
 
     public function repayments()
     {
-        return $this->hasMany(Repayment::class);
+        return $this->hasMany(Repayment::class, 'loan_id', 'id');
     }
 }

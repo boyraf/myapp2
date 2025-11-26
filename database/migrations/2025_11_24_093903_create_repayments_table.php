@@ -14,6 +14,7 @@ return new class extends Migration
             $table->decimal('amount_paid', 10,2);
             $table->decimal('balance_after_payment', 10,2);
             $table->date('payment_date');
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
         });
     }

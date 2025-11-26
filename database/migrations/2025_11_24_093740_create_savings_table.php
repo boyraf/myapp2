@@ -15,6 +15,7 @@ return new class extends Migration
             $table->enum('type', ['deposit', 'withdrawal']);
             $table->decimal('balance_after', 10, 2);
             $table->date('date');
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
         });
     }
