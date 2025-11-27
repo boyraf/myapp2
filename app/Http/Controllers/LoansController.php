@@ -106,4 +106,64 @@ public function toggleStatus($id)
     return redirect()->route('admin.loans')->with('success', 'Loan status updated successfully.');
 }
 
+// ============ MEMBER PORTAL ROUTES ============
+
+public function apply()
+{
+    return view('member.loans.apply');
+}
+
+public function storeApply(Request $request)
+{
+    $request->validate([
+        'amount' => 'required|numeric|min:100',
+        'repayment_period' => 'required|integer|min:1|max:60',
+    ]);
+
+    $member = auth('member')->user();
+    $loan = Loan::create([
+        'member_id' => $member->id,
+        'amount' => $request->amount,
+        'interest_rate' => 10, // Default interest rate
+        'repayment_period' => $request->repayment_period,
+        'balance' => $request->amount,
+        'status' => 'pending',
+        'issue_date' => now(),
+        'due_date' => now()->addMonths($request->repayment_period),
+    ]);
+
+    // Optional: accept guarantors array in the request. Expected format:
+    // guarantors => [ ['guarantor_id' => 2, 'amount_guaranteed' => 1000], ... ]
+    if ($request->has('guarantors') && is_array($request->guarantors)) {
+        foreach ($request->guarantors as $g) {
+            if (isset($g['guarantor_id']) && isset($g['amount_guaranteed'])) {
+                // basic validation
+                $guarantorMember = Member::find($g['guarantor_id']);
+                if ($guarantorMember && $guarantorMember->id !== $member->id) {
+                    $loan->guarantors()->create([
+                        'guarantor_id' => $g['guarantor_id'],
+                        'amount_guaranteed' => $g['amount_guaranteed'],
+                    ]);
+                }
+            }
+        }
+    }
+
+    return redirect()->route('member.loans.history')->with('success', 'Loan application submitted. Add guarantors to your pending loan if needed.');
+}
+
+public function history()
+{
+    $member = auth('member')->user();
+    $loans = $member->loans()->paginate(10);
+    return view('member.loans.history', compact('loans'));
+}
+
+public function schedule()
+{
+    $member = auth('member')->user();
+    $loans = $member->loans()->where('status', 'active')->with('totalRepayments')->get();
+    return view('member.loans.schedule', compact('loans'));
+}
+
 }

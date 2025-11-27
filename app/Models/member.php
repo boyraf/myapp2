@@ -2,22 +2,30 @@
 
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 
-class Member extends Model
+class Member extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
         'email',
+        'password',
         'phone',
         'id_number',
         'date_of_birth',
         'address',
         'membership_date',
-        'status'
+        'status',
+        'shares'
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
 
     // Relationships
@@ -34,6 +42,12 @@ class Member extends Model
     public function loans()
     {
         return $this->hasMany(Loan::class);
+    }
+
+    public function guarantees()
+    {
+        // guarantees the member has made for others' loans
+        return $this->hasMany(Guarantor::class, 'guarantor_id', 'id');
     }
 
     public function transactions()

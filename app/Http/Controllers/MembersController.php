@@ -13,6 +13,15 @@ class MembersController extends Controller
         return view('members.index', compact('members'));
     }
 
+    /**
+     * Member dashboard view.
+     */
+    public function dashboard()
+    {
+        $member = auth('member')->user();
+        return view('member.dashboard', compact('member'));
+    }
+
     public function create()
     {
         return view('members.create');
@@ -67,5 +76,104 @@ class MembersController extends Controller
         $member->save();
 
         return redirect()->route('admin.members')->with('success', 'Member status updated successfully.');
+    }
+
+    // ============ MEMBER PORTAL ROUTES ============
+
+    // Dashboard sub-views
+    public function dashboardSavings()
+    {
+        $member = auth('member')->user();
+        return view('member.dashboard.savings', compact('member'));
+    }
+
+    public function dashboardLoans()
+    {
+        $member = auth('member')->user();
+        return view('member.dashboard.loans', compact('member'));
+    }
+
+    public function dashboardLimit()
+    {
+        $member = auth('member')->user();
+        return view('member.dashboard.limit', compact('member'));
+    }
+
+    public function dashboardPending()
+    {
+        $member = auth('member')->user();
+        return view('member.dashboard.pending', compact('member'));
+    }
+
+    // Profile views
+    public function profileView()
+    {
+        $member = auth('member')->user();
+        return view('member.profile.view', compact('member'));
+    }
+
+    public function profileUpdate()
+    {
+        $member = auth('member')->user();
+        return view('member.profile.update', compact('member'));
+    }
+
+    public function profileStore(Request $request)
+    {
+        $member = auth('member')->user();
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:members,email,' . $member->id,
+            'phone' => 'required|string',
+            'address' => 'nullable|string',
+        ]);
+
+        $member->update($request->only(['name', 'email', 'phone', 'address']));
+
+        return redirect()->route('member.profile.view')->with('success', 'Profile updated successfully.');
+    }
+
+    public function passwordForm()
+    {
+        return view('member.profile.password');
+    }
+
+    public function passwordStore(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $member = auth('member')->user();
+        if (!\Illuminate\Support\Facades\Hash::check($request->current_password, $member->password)) {
+            return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+        }
+
+        $member->update(['password' => \Illuminate\Support\Facades\Hash::make($request->password)]);
+
+        return redirect()->route('member.profile.password')->with('success', 'Password changed successfully.');
+    }
+
+    // Support views
+    public function contactForm()
+    {
+        return view('member.support.contact');
+    }
+
+    public function contactStore(Request $request)
+    {
+        $request->validate([
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
+        ]);
+
+        // TODO: Save support ticket or send email
+        return back()->with('success', 'Your message has been sent. We will contact you soon.');
+    }
+
+    public function faq()
+    {
+        return view('member.support.faq');
     }
 }

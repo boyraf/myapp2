@@ -7,6 +7,7 @@ use App\Models\Member;
 use App\Models\Admin;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -23,24 +24,30 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:members,email',
-            'password' => 'required|string|min:6|confirmed', // password + password_confirmation
+            'password' => 'required|string|min:6|confirmed',
             'phone' => 'required|string',
-            'id_number' => 'required|string',
+            'id_number' => 'required|string|unique:members,id_number',
+            'date_of_birth' => 'nullable|date',
+            'address' => 'nullable|string',
         ]);
 
-        Member::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'id_number' => $request->id_number,
-            'date_of_birth' => $request->date_of_birth,
-            'address' => $request->address,
-            'membership_date' => now(),
-            'status' => 'active',
-            'password' => Hash::make($request->password),
-        ]);
+        try {
+            Member::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'id_number' => $request->id_number,
+                'date_of_birth' => $request->date_of_birth,
+                'address' => $request->address,
+                'membership_date' => now(),
+                'status' => 'active',
+                'password' => Hash::make($request->password),
+            ]);
 
-        return redirect()->route('login')->with('success', 'Account created! Please login.');
+            return redirect()->route('login')->with('success', 'Account created! Please login.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['signup' => 'An error occurred during signup. Please try again.'])->withInput();
+        }
     }
 
     // ------------------------
@@ -58,9 +65,19 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
+        // Debug logging: record lookup and password check (temporary)
+        $user = Member::where('email', $request->email)->first();
+        if (! $user) {
+            Log::info('Member login failed: no member with email '.$request->email);
+        } else {
+            Log::info('Member login attempt for id '.$user->id.'; password_check='.(Hash::check($request->password, $user->password) ? 'pass' : 'fail'));
+        }
+
         if (Auth::guard('member')->attempt($request->only('email', 'password'))) {
             $request->session()->regenerate();
-            return redirect()->route('member.dashboard');
+            // Use intended to send the user back to the URL they originally tried to access
+            // falling back to the member dashboard if none was stored.
+            return redirect()->intended(route('member.dashboard'));
         }
 
         return back()->withErrors(['email' => 'Invalid credentials'])->withInput();

@@ -116,4 +116,59 @@ public function toggleStatus($id)
     return redirect()->back()->with('success', 'Status updated successfully.');
 }
 
+// ============ MEMBER PORTAL ROUTES ============
+
+public function history()
+{
+    $member = auth('member')->user();
+    $repayments = \DB::table('repayments')
+        ->join('loans', 'repayments.loan_id', '=', 'loans.id')
+        ->where('loans.member_id', $member->id)
+        ->select('repayments.*')
+        ->paginate(10);
+    return view('member.repayments.history', compact('repayments'));
+}
+
+public function schedule()
+{
+    $member = auth('member')->user();
+    $loans = $member->loans()->where('status', 'active')->get();
+    return view('member.repayments.schedule', compact('loans'));
+}
+
+public function make()
+{
+    $member = auth('member')->user();
+    $loans = $member->loans()->where('status', 'active')->get();
+    return view('member.repayments.make', compact('loans'));
+}
+
+public function storeMake(Request $request)
+{
+    $request->validate([
+        'loan_id' => 'required|exists:loans,id',
+        'amount_paid' => 'required|numeric|min:0.01',
+    ]);
+
+    $loan = Loan::findOrFail($request->loan_id);
+
+    // Verify the loan belongs to the member
+    if ($loan->member_id !== auth('member')->user()->id) {
+        return back()->withErrors(['loan_id' => 'Unauthorized']);
+    }
+
+    $balance_after = $loan->balance - $request->amount_paid;
+
+    Repayment::create([
+        'loan_id' => $loan->id,
+        'amount_paid' => $request->amount_paid,
+        'balance_after_payment' => $balance_after,
+        'payment_date' => now(),
+    ]);
+
+    $loan->update(['balance' => $balance_after]);
+
+    return redirect()->route('member.repayments.history')->with('success', 'Repayment recorded successfully.');
+}
+
 }

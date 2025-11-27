@@ -17,6 +17,9 @@ return new class extends Migration
             $table->string('address');
             $table->date('membership_date');
             $table->string('status')->default('active'); // active/inactive/delinquent
+            // Shares count (number of shares owned)
+            $table->integer('shares')->default(0);
+            $table->string('password');
             $table->timestamps();
         });
     }

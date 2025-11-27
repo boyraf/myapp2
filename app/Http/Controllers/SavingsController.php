@@ -83,4 +83,69 @@ public function toggleStatus($id)
     return redirect()->back()->with('success', 'Status updated successfully.');
 }
 
+// ============ MEMBER PORTAL ROUTES ============
+
+public function statement()
+{
+    $member = auth('member')->user();
+    $savings = $member->savings()->paginate(10);
+    return view('member.savings.statement', compact('savings'));
+}
+
+public function deposit()
+{
+    return view('member.savings.deposit');
+}
+
+public function storeDeposit(Request $request)
+{
+    $request->validate([
+        'amount' => 'required|numeric|min:0.01',
+    ]);
+
+    $member = auth('member')->user();
+    $balance_after = $member->savings()->sum('amount') + $request->amount;
+
+    Saving::create([
+        'member_id' => $member->id,
+        'amount' => $request->amount,
+        'type' => 'deposit',
+        'balance_after' => $balance_after,
+        'date' => now(),
+    ]);
+
+    return redirect()->route('member.savings.statement')->with('success', 'Deposit successful.');
+}
+
+public function withdraw()
+{
+    return view('member.savings.withdraw');
+}
+
+public function storeWithdraw(Request $request)
+{
+    $request->validate([
+        'amount' => 'required|numeric|min:0.01',
+    ]);
+
+    $member = auth('member')->user();
+    $currentBalance = $member->savings()->sum('amount');
+
+    if ($request->amount > $currentBalance) {
+        return back()->withErrors(['amount' => 'Insufficient savings balance.']);
+    }
+
+    $balance_after = $currentBalance - $request->amount;
+
+    Saving::create([
+        'member_id' => $member->id,
+        'amount' => -$request->amount,
+        'type' => 'withdrawal',
+        'balance_after' => $balance_after,
+        'date' => now(),
+    ]);
+
+    return redirect()->route('member.savings.statement')->with('success', 'Withdrawal request submitted.');
+}
+
 }

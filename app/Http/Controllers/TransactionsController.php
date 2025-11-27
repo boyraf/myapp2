@@ -39,4 +39,21 @@ class TransactionsController extends Controller
             'type'
         ));
     }
+
+    // ============ MEMBER PORTAL ROUTES ============
+
+    public function recent()
+    {
+        $member = auth('member')->user();
+        $transactions = $member->transactions()->paginate(10);
+        return view('member.transactions.recent', compact('transactions'));
+    }
+
+    public function download()
+    {
+        $member = auth('member')->user();
+        $transactions = $member->transactions()->get();
+        // TODO: Generate PDF/Excel file
+        return view('member.transactions.download', compact('transactions'));
+    }
 }

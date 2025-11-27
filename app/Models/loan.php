@@ -33,4 +33,9 @@ class Loan extends Model
     {
         return $this->hasMany(Repayment::class, 'loan_id', 'id');
     }
+
+    public function guarantors()
+    {
+        return $this->hasMany(Guarantor::class, 'loan_id', 'id');
+    }
 }
