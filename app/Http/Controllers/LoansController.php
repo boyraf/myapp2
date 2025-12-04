@@ -82,16 +82,10 @@ class LoansController extends Controller
         return redirect()->route('admin.loans')->with('success', 'Loan updated successfully.');
     }
 
-    public function deactivate($id)
-{
-    $loan = Loan::findOrFail($id);
-    $loan->status = 'inactive';
-    $loan->save();
+    // Deactivate method removed: loans should use pending/approved/paid/overdue statuses only
+    // Use toggleStatus() or update() to manage loan status
 
-    return redirect()->back()->with('success', 'Loan deactivated successfully.');
-}
-
-public function toggleStatus($id)
+    public function toggleStatus($id)
 {
     $loan = Loan::findOrFail($id);
 

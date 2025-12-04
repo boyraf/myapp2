@@ -67,7 +67,12 @@ class RepaymentsController extends Controller
             'payment_date' => $request->payment_date,
         ]);
 
-        $loan->update(['balance' => $balance_after]);
+        // Update loan balance and mark paid if fully repaid
+        if ($balance_after <= 0) {
+            $loan->update(['balance' => 0, 'status' => 'paid']);
+        } else {
+            $loan->update(['balance' => $balance_after]);
+        }
 
         return redirect()->route('admin.repayments')->with('success', 'Repayment recorded successfully.');
     }
@@ -90,7 +95,12 @@ class RepaymentsController extends Controller
         $loan->balance += $repayment->amount_paid; // revert old amount
         $loan->balance -= $request->amount_paid; // apply new amount
         $loan->save();
-
+        // If loan fully repaid after update, mark as paid
+        if ($loan->balance <= 0) {
+            $loan->status = 'paid';
+            $loan->balance = 0;
+            $loan->save();
+        }
         $repayment->update([
             'amount_paid' => $request->amount_paid,
             'balance_after_payment' => $loan->balance,
@@ -170,7 +180,12 @@ public function storeMake(Request $request)
         'payment_date' => now(),
     ]);
 
-    $loan->update(['balance' => $balance_after]);
+    // Update loan balance and mark paid if fully repaid
+    if ($balance_after <= 0) {
+        $loan->update(['balance' => 0, 'status' => 'paid']);
+    } else {
+        $loan->update(['balance' => $balance_after]);
+    }
 
     return redirect()->route('member.repayments.history')->with('success', 'Repayment recorded successfully.');
 }

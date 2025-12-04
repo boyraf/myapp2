@@ -20,6 +20,8 @@ class MemberFactory extends Factory
             'address' => $this->faker->address(),
             'membership_date' => $this->faker->date(),
             'status' => $this->faker->randomElement(['active','inactive']),
+            'password' => bcrypt('password'),
+            'shares' => 0,
         ];
     }
 }
