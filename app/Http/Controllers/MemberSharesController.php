@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Share;
 use App\Models\Member;
+// Import Transaction model to record share buy/sell transactions
+use App\Models\Transaction;
 
 class MemberSharesController extends Controller
 {
@@ -18,7 +20,14 @@ class MemberSharesController extends Controller
     public function buy()
     {
         $member = auth('member')->user();
-        return view('member.shares.buy', compact('member'));
+        // Get available pool shares (controlled_by_admin = true)
+        $poolShares = Share::where('controlled_by_admin', true)
+            ->whereNull('member_id')
+            ->where('quantity', '>', 0)
+            ->orderBy('price_per_share')
+            ->get();
+        $totalAvailable = $poolShares->sum('quantity');
+        return view('member.shares.buy', compact('member', 'poolShares', 'totalAvailable'));
     }
 
     public function storeBuy(Request $request)
@@ -26,22 +35,66 @@ class MemberSharesController extends Controller
         $member = auth('member')->user();
         $data = $request->validate([
             'quantity' => 'required|integer|min:1',
-            'price_per_share' => 'required|numeric|min:0',
         ]);
 
-        $data['member_id'] = $member->id;
-        $data['total_value'] = $data['quantity'] * $data['price_per_share'];
-        $data['acquired_at'] = now();
-        $data['status'] = 'active';
-        $data['controlled_by_admin'] = false;
+        // Find available pool shares
+        $poolShares = Share::where('controlled_by_admin', true)
+            ->whereNull('member_id')
+            ->where('quantity', '>', 0)
+            ->orderBy('price_per_share')
+            ->get();
+        $totalAvailable = $poolShares->sum('quantity');
 
-        $share = Share::create($data);
+        if ($data['quantity'] > $totalAvailable) {
+            return back()->withErrors(['quantity' => 'Not enough shares available in the pool'])->withInput();
+        }
+
+        $toBuy = $data['quantity'];
+        $bought = 0;
+        $totalCost = 0;
+        foreach ($poolShares as $poolShare) {
+            if ($toBuy <= 0) break;
+            $take = min($poolShare->quantity, $toBuy);
+            // Transfer shares: update pool share or split
+            if ($take == $poolShare->quantity) {
+                // Assign whole share record to member
+                $poolShare->member_id = $member->id;
+                $poolShare->controlled_by_admin = false;
+                $poolShare->acquired_at = now();
+                $poolShare->save();
+            } else {
+                // Split: reduce pool, create new for member
+                $poolShare->quantity -= $take;
+                $poolShare->save();
+                Share::create([
+                    'member_id' => $member->id,
+                    'quantity' => $take,
+                    'price_per_share' => $poolShare->price_per_share,
+                    'total_value' => $take * $poolShare->price_per_share,
+                    'acquired_at' => now(),
+                    'status' => 'active',
+                    'controlled_by_admin' => false,
+                ]);
+            }
+            $bought += $take;
+            $totalCost += $take * $poolShare->price_per_share;
+            $toBuy -= $take;
+        }
 
         // Update member shares count
-        $member->shares = ($member->shares ?? 0) + $share->quantity;
+        $member->shares = ($member->shares ?? 0) + $bought;
         $member->save();
 
-        return redirect()->route('member.shares.index')->with('success','Share purchase recorded');
+        // Record share purchase transaction for audit trail and accounting
+        Transaction::create([
+            'member_id' => $member->id,
+            'type' => 'share_purchase',
+            'amount' => $totalCost,
+            'balance_after' => $member->shares,
+            'description' => "Purchased $bought shares at cost $totalCost",
+        ]);
+
+        return redirect()->route('member.shares.index')->with('success', "Bought $bought shares for total cost $totalCost");
     }
 
     public function sell()
@@ -79,6 +132,16 @@ class MemberSharesController extends Controller
         // Deduct from member's shares count
         $member->shares = max(0, ($member->shares ?? 0) - $quantity);
         $member->save();
+
+        // Record share sale transaction for audit trail and accounting
+        $saleAmount = $quantity * $data['price_per_share'];
+        Transaction::create([
+            'member_id' => $member->id,
+            'type' => 'share_sale',
+            'amount' => $saleAmount,
+            'balance_after' => $member->shares,
+            'description' => "Sold $quantity shares at amount $saleAmount",
+        ]);
 
         return redirect()->route('member.shares.index')->with('success','Share sale recorded');
     }

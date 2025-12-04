@@ -15,11 +15,41 @@ class MembersController extends Controller
 
     /**
      * Member dashboard view.
+     * Loads all member financial data for dashboard display.
      */
     public function dashboard()
     {
         $member = auth('member')->user();
-        return view('member.dashboard', compact('member'));
+        
+        // Calculate total savings from all saving records
+        $totalSavings = $member->savings()->sum('amount');
+        
+        // Get active loans and calculate balance
+        $activeLoans = $member->loans()->where('status', 'approved')->get();
+        $loanBalance = $activeLoans->sum('balance');
+        
+        // Calculate loan limit based on savings (3x multiplier per SACCO rules)
+        $loanLimit = $totalSavings * 3;
+        
+        // Get pending loans awaiting approval
+        $pendingLoans = $member->loans()->where('status', 'pending')->count();
+        
+        // Get share count from member record
+        $shareCount = $member->shares ?? 0;
+        
+        // Get recent transactions for activity feed
+        $recentTransactions = $member->transactions()->latest()->take(5)->get();
+        
+        // Compact all data and return view
+        return view('member.dashboard', compact(
+            'member',
+            'totalSavings',
+            'loanBalance',
+            'loanLimit',
+            'pendingLoans',
+            'shareCount',
+            'recentTransactions'
+        ));
     }
 
     public function create()

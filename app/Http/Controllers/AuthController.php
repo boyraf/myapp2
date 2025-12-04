@@ -16,7 +16,7 @@ class AuthController extends Controller
     // ------------------------
     public function showSignup()
     {
-        return view('auth.signup'); // <- uses resources/views/auth/signup.blade.php
+        return view('auth.signup');
     }
 
     public function signup(Request $request)
@@ -55,7 +55,7 @@ class AuthController extends Controller
     // ------------------------
     public function showLogin()
     {
-        return view('auth.login'); // <- resources/views/auth/login.blade.php
+        return view('auth.login');
     }
 
     public function login(Request $request)
@@ -65,7 +65,6 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        // Debug logging: record lookup and password check (temporary)
         $user = Member::where('email', $request->email)->first();
         if (! $user) {
             Log::info('Member login failed: no member with email '.$request->email);
@@ -75,20 +74,23 @@ class AuthController extends Controller
 
         if (Auth::guard('member')->attempt($request->only('email', 'password'))) {
             $request->session()->regenerate();
-            // Use intended to send the user back to the URL they originally tried to access
-            // falling back to the member dashboard if none was stored.
             return redirect()->intended(route('member.dashboard'));
         }
 
         return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
     }
 
+    // ------------------------
+    // MEMBER LOGOUT
+    // ------------------------
     public function logout(Request $request)
     {
         Auth::guard('member')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('login');
+
+        // Redirect to homepage after logout
+        return redirect()->route('home');
     }
 
     // ------------------------
@@ -96,7 +98,7 @@ class AuthController extends Controller
     // ------------------------
     public function showAdminLogin()
     {
-        return view('auth.admin_login'); // <- resources/views/auth/admin_login.blade.php
+        return view('auth.admin_login');
     }
 
     public function adminLogin(Request $request)
@@ -108,19 +110,16 @@ class AuthController extends Controller
 
         if (Auth::guard('admin')->attempt($request->only('email', 'password'))) {
 
-            //Check role 
             if (Auth::guard('admin')->user()->role != 'admin') {
                 Auth::guard('admin')->logout();
-                return back()->withErrors(['email' => 'Access denied.'])
-                             ->withInput();
+                return back()->withErrors(['email' => 'Access denied.'])->withInput();
             }
 
             $request->session()->regenerate();
             return redirect()->route('admin.dashboard');
         }
 
-        return back()->withErrors(['email' => 'Invalid admin credentials'])
-                     ->withInput();
+        return back()->withErrors(['email' => 'Invalid admin credentials'])->withInput();
     }
 
     public function adminLogout(Request $request)
@@ -128,6 +127,7 @@ class AuthController extends Controller
         Auth::guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect()->route('admin.login');
     }
 }

@@ -20,8 +20,10 @@
         <input type="number" step="0.01" name="interest_rate" placeholder="Interest Rate %" class="form-control mb-2" value="{{ $loan->interest_rate }}" required>
         <input type="number" name="repayment_period" placeholder="Repayment Period (months)" class="form-control mb-2" value="{{ $loan->repayment_period }}" required>
         <select name="status" class="form-control mb-2" required>
-            <option value="active" {{ $loan->status == 'active' ? 'selected' : '' }}>Active</option>
-            <option value="inactive" {{ $loan->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+            <option value="pending" {{ $loan->status == 'pending' ? 'selected' : '' }}>Pending</option>
+            <option value="approved" {{ $loan->status == 'approved' ? 'selected' : '' }}>Approved</option>
+            <option value="paid" {{ $loan->status == 'paid' ? 'selected' : '' }}>Paid</option>
+            <option value="overdue" {{ $loan->status == 'overdue' ? 'selected' : '' }}>Overdue</option>
         </select>
         <button type="submit" class="btn btn-primary w-100">Update Loan</button>
     </form>

@@ -44,7 +44,8 @@ class RepaymentsController extends Controller
 
     public function create()
     {
-        $loans = Loan::where('status', 'active')->get();
+        // Get loans with 'approved' status that can be repaid
+        $loans = Loan::where('status', 'approved')->get();
         return view('repayments.create', compact('loans'));
     }
 
@@ -73,7 +74,8 @@ class RepaymentsController extends Controller
 
     public function edit(Repayment $repayment)
     {
-        $loans = Loan::where('status', 'active')->get();
+        // Get loans with 'approved' status that can be repaid
+        $loans = Loan::where('status', 'approved')->get();
         return view('repayments.edit', compact('repayment', 'loans'));
     }
 
@@ -132,14 +134,16 @@ public function history()
 public function schedule()
 {
     $member = auth('member')->user();
-    $loans = $member->loans()->where('status', 'active')->get();
+    // Get member's approved loans that are still outstanding
+    $loans = $member->loans()->where('status', 'approved')->get();
     return view('member.repayments.schedule', compact('loans'));
 }
 
 public function make()
 {
     $member = auth('member')->user();
-    $loans = $member->loans()->where('status', 'active')->get();
+    // Get member's approved loans that can be repaid
+    $loans = $member->loans()->where('status', 'approved')->get();
     return view('member.repayments.make', compact('loans'));
 }
 

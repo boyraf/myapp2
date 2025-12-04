@@ -19,36 +19,29 @@ class AdminSharesController extends Controller
         return view('admin.shares.index', compact('shares'));
     }
 
+
     public function create()
     {
-        $members = Member::orderBy('name')->get();
-        return view('admin.shares.create', compact('members'));
+        // Pool shares: no member assignment at creation
+        return view('admin.shares.create');
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'member_id' => 'nullable|exists:members,id',
             'quantity' => 'required|integer|min:1',
             'price_per_share' => 'required|numeric|min:0',
-            'controlled_by_admin' => 'sometimes|boolean',
         ]);
 
         $data['total_value'] = $data['quantity'] * $data['price_per_share'];
         $data['acquired_at'] = now();
         $data['status'] = 'active';
-        $data['controlled_by_admin'] = $request->has('controlled_by_admin');
+        $data['controlled_by_admin'] = true;
+        $data['member_id'] = null;
 
-        $share = Share::create($data);
+        Share::create($data);
 
-        // If assigned to member, update member shares count (quantity)
-        if ($share->member_id) {
-            $member = Member::find($share->member_id);
-            $member->shares = ($member->shares ?? 0) + $share->quantity;
-            $member->save();
-        }
-
-        return redirect()->route('admin.shares')->with('success', 'Share created');
+        return redirect()->route('admin.shares')->with('success', 'Pool share created');
     }
 
     public function edit($id)

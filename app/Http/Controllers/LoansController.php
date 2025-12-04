@@ -52,7 +52,8 @@ class LoansController extends Controller
             'interest_rate' => $request->interest_rate,
             'repayment_period' => $request->repayment_period,
             'balance' => $request->amount,
-            'status' => 'active',
+            // Set loan status to 'approved' (matches enum in migrations: pending/approved/paid/overdue)
+            'status' => 'approved',
             'issue_date' => now(),
             'due_date' => now()->addMonths($request->repayment_period),
         ]);
@@ -162,7 +163,8 @@ public function history()
 public function schedule()
 {
     $member = auth('member')->user();
-    $loans = $member->loans()->where('status', 'active')->with('totalRepayments')->get();
+    // Get member's approved loans that are still active (not yet paid)
+    $loans = $member->loans()->where('status', 'approved')->with('totalRepayments')->get();
     return view('member.loans.schedule', compact('loans'));
 }
 
