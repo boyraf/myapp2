@@ -297,7 +297,6 @@ class RepaymentTest extends TestCase
             'due_date' => now()->addMonths(6),
             'balance' => 100000,
         ]);
-
         $repaymentDate = now();
 
         $repayment = Repayment::create([
@@ -307,6 +306,6 @@ class RepaymentTest extends TestCase
             'payment_date' => $repaymentDate->toDateString(),
         ]);
 
-        $this->assertEquals($repaymentDate->toDateString(), $repayment->fresh()->payment_date);
+        $this->assertEquals($repaymentDate->toDateString(), $repayment->fresh()->payment_date->toDateString());
     }
 }

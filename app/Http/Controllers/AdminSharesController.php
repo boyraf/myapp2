@@ -19,7 +19,6 @@ class AdminSharesController extends Controller
         return view('admin.shares.index', compact('shares'));
     }
 
-
     public function create()
     {
         // Pool shares: no member assignment at creation
@@ -79,7 +78,41 @@ class AdminSharesController extends Controller
     // Placeholder: distribution endpoint
     public function distributeDividends(Request $request)
     {
-        // Implementation depends on business rules
-        return back()->with('success', 'Dividends distributed (stub)');
+        $data = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        $totalAmount = (float) $data['amount'];
+
+        // Total shares across all members
+        $totalShares = Member::sum('shares');
+
+        if ($totalShares <= 0) {
+            return back()->with('error', 'No shares found to distribute dividends to.');
+        }
+
+        // Loop members with shares and allocate proportionally
+        $members = Member::where('shares', '>', 0)->get();
+
+        foreach ($members as $member) {
+            $ratio = $member->shares / $totalShares;
+            $memberAmount = round($totalAmount * $ratio, 2);
+
+            if ($memberAmount <= 0) {
+                continue;
+            }
+
+            // Record transaction for dividend
+            \App\Models\Transaction::create([
+                'member_id' => $member->id,
+                'type' => 'dividend',
+                'amount' => $memberAmount,
+                'balance_after' => $memberAmount,
+                'description' => $data['description'] ?? 'Dividend distribution',
+            ]);
+        }
+
+        return back()->with('success', 'Dividends distributed successfully.');
     }
 }

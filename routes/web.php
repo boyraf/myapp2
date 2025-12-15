@@ -13,6 +13,7 @@ use App\Http\Controllers\AdminSharesController;
 use App\Http\Controllers\MemberSharesController;
 use App\Http\Controllers\MemberGuarantorsController;
 use App\Http\Controllers\AdminGuarantorsController;
+use App\Http\Controllers\ReportController;
 use App\Http\Middleware\PreventBackHistory;
 
 /*
@@ -77,6 +78,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
         Route::get('{id}/edit', [LoansController::class, 'edit'])->name('loans.edit');
         Route::put('{id}', [LoansController::class, 'update'])->name('loans.update');
         Route::match(['put','patch'], '{id}/status', [LoansController::class, 'toggleStatus'])->name('loans.toggleStatus');
+        Route::post('{id}/approve', [LoansController::class, 'approve'])->name('loans.approve');
     });
 
     // Guarantors
@@ -119,6 +121,21 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     // Transactions & Audit Logs
     Route::get('transactions', [TransactionsController::class, 'index'])->name('transactions');
     Route::get('auditlogs', [AuditLogsController::class, 'index'])->name('auditlogs');
+
+    // Reports
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/loans', [ReportController::class, 'loanStatement'])->name('loans');
+        Route::get('/loans/export-csv', [ReportController::class, 'exportLoanCSV'])->name('loans.csv');
+        
+        Route::get('/repayments', [ReportController::class, 'repaymentSchedule'])->name('repayments');
+        Route::get('/repayments/export-csv', [ReportController::class, 'exportRepaymentCSV'])->name('repayments.csv');
+        
+        Route::get('/shares', [ReportController::class, 'shareHoldings'])->name('shares');
+        Route::get('/shares/export-csv', [ReportController::class, 'exportSharesCSV'])->name('shares.csv');
+        
+        Route::get('/dividends', [ReportController::class, 'dividendStatement'])->name('dividends');
+        Route::get('/dividends/export-csv', [ReportController::class, 'exportDividendCSV'])->name('dividends.csv');
+    });
 });
 
 /*

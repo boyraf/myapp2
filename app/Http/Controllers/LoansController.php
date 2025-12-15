@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Loan;
 use App\Models\Member;
+use App\Models\Transaction;
 use DB;
 
 class LoansController extends Controller
@@ -102,6 +103,47 @@ class LoansController extends Controller
 }
 
 // ============ MEMBER PORTAL ROUTES ============
+
+    /**
+     * Approve a pending loan if guarantor requirements are met.
+     * Assumption: guarantors must cover at least 50% of the loan amount.
+     */
+    public function approve($id)
+    {
+        $loan = Loan::with('guarantors')->findOrFail($id);
+
+        if ($loan->status !== 'pending') {
+            return redirect()->route('admin.loans')->with('error', 'Loan is not pending approval.');
+        }
+
+        // Sum of guarantor coverage
+        $coverage = $loan->guarantors->sum('amount_guaranteed');
+
+        // Business rule: require 50% coverage from guarantors (adjustable)
+        $requiredCoverage = $loan->amount * 0.5;
+
+        if ($coverage < $requiredCoverage) {
+            return redirect()->route('admin.loans')->with('error', 'Insufficient guarantor coverage to approve this loan.');
+        }
+
+        // Approve and set issue_date if not already set
+        $loan->status = 'approved';
+        if (empty($loan->issue_date)) {
+            $loan->issue_date = now();
+        }
+        $loan->save();
+
+        // Record a loan disbursement transaction
+        Transaction::create([
+            'member_id' => $loan->member_id,
+            'type' => 'loan_disbursement',
+            'amount' => $loan->amount,
+            'balance_after' => $loan->balance,
+            'description' => "Loan #{$loan->id} disbursed",
+        ]);
+
+        return redirect()->route('admin.loans')->with('success', 'Loan approved and disbursed.');
+    }
 
 public function apply()
 {

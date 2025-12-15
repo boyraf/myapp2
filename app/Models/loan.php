@@ -19,6 +19,12 @@ class Loan extends Model
         'due_date',
         'balance'
     ];
+
+    protected $casts = [
+        'issue_date' => 'datetime',
+        'due_date' => 'datetime',
+    ];
+
     public function scopeActive($query)
     {
         // Scope to get approved loans that are not yet paid (active status)

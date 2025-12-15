@@ -17,6 +17,10 @@ class Repayment extends Model
         'status'
     ];
 
+    protected $casts = [
+        'payment_date' => 'datetime',
+    ];
+
     // Each repayment belongs to one loan
     public function scopeActive($query)
     {
