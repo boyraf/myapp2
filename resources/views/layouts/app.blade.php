@@ -129,6 +129,7 @@
         }
     </style>
 </head>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <body>
 
@@ -142,25 +143,55 @@
         </div>
     </nav>
 
-    {{-- SIDEBAR --}}
-    <div class="sidebar" id="sidebar">
-        <a href="/admin"><i class="fas fa-home"></i> <span>Dashboard</span></a>
-        <a href="/admin/members"><i class="fas fa-users"></i> <span>Members</span></a>
-        <a href="/admin/savings"><i class="fa-solid fa-piggy-bank"></i> <span>Savings</span></a>
-        <a href="/admin/loans"><i class="fas fa-hand-holding-usd"></i> <span>Loans</span></a>
-        <a href="/admin/repayments"><i class="fas fa-money-bill-transfer"></i> <span>Repayments</span></a>
-        <a href="/admin/transactions"><i class="fas fa-receipt"></i> <span>Transactions</span></a>
-        <a href="/admin/auditlogs"><i class="fas fa-clipboard-check"></i> <span>Audit Logs</span></a>
-        <form action="{{ route('admin.logout') }}" method="POST" class="m-0 p-0">
+{{-- SIDEBAR --}}
+<div class="sidebar" id="sidebar">
+    <a href="/admin"><i class="fas fa-home"></i> <span>Dashboard</span></a>
+    <a href="/admin/members"><i class="fas fa-users"></i> <span>Members</span></a>
+
+    <!-- Savings -->
+    <a data-bs-toggle="collapse" href="#savingsMenu" role="button" aria-expanded="false" aria-controls="savingsMenu">
+        <i class="fa-solid fa-piggy-bank"></i> <span>Savings</span>
+        <i class="fas fa-chevron-down ms-auto"></i>
+    </a>
+    <div class="collapse ps-4" id="savingsMenu">
+        <a href="/admin/savings" class="d-block py-1">Overview</a>
+        <a href="/admin/savings/action" class="d-block py-1">Action</a>
+    </div>
+
+    <!-- Loans -->
+    <a data-bs-toggle="collapse" href="#loansMenu" role="button" aria-expanded="false" aria-controls="loansMenu">
+        <i class="fas fa-hand-holding-usd"></i> <span>Loans</span>
+        <i class="fas fa-chevron-down ms-auto"></i>
+    </a>
+    <div class="collapse ps-4" id="loansMenu">
+        <a href="/admin/loans" class="d-block py-1">Overview</a>
+        <a href="/admin/loans/pending" class="d-block py-1">Action</a>
+    </div>
+
+    <!-- Repayments -->
+    <a data-bs-toggle="collapse" href="#repaymentsMenu" role="button" aria-expanded="false" aria-controls="repaymentsMenu">
+        <i class="fas fa-money-bill-transfer"></i> <span>Repayments</span>
+        <i class="fas fa-chevron-down ms-auto"></i>
+    </a>
+    <div class="collapse ps-4" id="repaymentsMenu">
+        <a href="/admin/repayments" class="d-block py-1">Overview</a>
+        <a href="/admin/repayments/action" class="d-block py-1">Action</a>
+    </div>
+
+    <a href="/admin/transactions"><i class="fas fa-receipt"></i> <span>Transactions</span></a>
+    <a href="/admin/auditlogs"><i class="fas fa-clipboard-check"></i> <span>Audit Logs</span></a>
+    
+    <form action="{{ route('admin.logout') }}" method="POST" class="m-0 p-0">
         @csrf
         <button type="submit" class="btn btn-link text-start text-decoration-none w-100 d-flex align-items-center gap-2" style="color: #cbd5e1; padding: 12px 18px;">
             <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
         </button>
     </form>
-    </div>
+</div>
+
 
     {{-- MAIN CONTENT --}}
-    <div class="content" id="content" style="position: fixed; top: 10; left: 250px; width: calc(100% - 250px); height: 100%; padding: 20px 30px; overflow-y: auto; background-color: #f9f9f9; box-sizing: border-box;">
+    <div class="content" id="content" style="position: fixed; top: 10; left: 160px; width: calc(100% - 250px); height: 100%; padding: 20px 30px; overflow-y: auto; background-color: #f9f9f9; box-sizing: border-box;">
     @yield('content')
 </div>
 

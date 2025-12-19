@@ -39,6 +39,11 @@ class Member extends Authenticatable
         return $this->hasMany(Saving::class);
     }
 
+    public function totalSavings()
+    {
+        return $this->savings()->sum('amount');
+    }
+
     public function loans()
     {
         return $this->hasMany(Loan::class);

@@ -1,34 +1,45 @@
 @extends('layouts.member')
 
 @section('content')
-<h1 class="mb-3">Loan Status & Details</h1>
+<h2>Repayment Schedule</h2>
 
 @if($loans->isEmpty())
-	<div class="alert alert-info">You have no approved loans.</div>
+    <p>You have no active loans.</p>
 @else
-	@foreach($loans as $loan)
-		<div class="card mb-4">
-			<div class="card-header bg-info text-white">
-				<strong>Loan #{{ $loan->id }}</strong> — Status: {{ ucfirst($loan->status) }}
-			</div>
-			<div class="card-body">
-				<div class="row mb-3">
-					<div class="col-md-6">
-						<p><strong>Original Amount:</strong> {{ number_format($loan->amount, 2) }}</p>
-						<p><strong>Current Balance:</strong> {{ number_format($loan->balance, 2) }}</p>
-						<p><strong>Interest Rate:</strong> {{ $loan->interest_rate }}% per annum</p>
-					</div>
-					<div class="col-md-6">
-						<p><strong>Repayment Period:</strong> {{ $loan->repayment_period }} months</p>
-						<p><strong>Issue Date:</strong> {{ \Carbon\Carbon::parse($loan->issue_date)->toDateString() }}</p>
-						<p><strong>Due Date:</strong> {{ \Carbon\Carbon::parse($loan->due_date)->toDateString() }}</p>
-					</div>
-				</div>
-				<hr>
-				<p class="mb-0"><strong>Monthly Interest (on current balance):</strong> {{ number_format($loan->monthlyInterest(), 2) }}</p>
-			</div>
-		</div>
-	@endforeach
-@endif
+    @foreach($loans as $loan)
+    <div class="card mb-3">
+        <div class="card-header">
+            Loan #{{ $loan->id }} — {{ number_format($loan->amount, 2) }} (Due: {{ $loan->due_date->format('Y-m-d') }})
+        </div>
+        <div class="card-body">
+            <p>Status: <strong>{{ ucfirst($loan->status) }}</strong></p>
+            <p>Balance: <strong>{{ number_format($loan->balance, 2) }}</strong></p>
 
+            @if($loan->totalRepayments->isNotEmpty())
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Remaining Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($loan->totalRepayments as $repayment)
+                    <tr>
+                        <td>{{ $repayment->created_at->format('Y-m-d') }}</td>
+                        <td>{{ number_format($repayment->amount, 2) }}</td>
+                        <td>{{ number_format($repayment->balance_after, 2) }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @else
+                <p>No repayments recorded yet.</p>
+            @endif
+        </div>
+    </div>
+    @endforeach
+@endif
 @endsection
+

@@ -78,7 +78,9 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
         Route::get('{id}/edit', [LoansController::class, 'edit'])->name('loans.edit');
         Route::put('{id}', [LoansController::class, 'update'])->name('loans.update');
         Route::match(['put','patch'], '{id}/status', [LoansController::class, 'toggleStatus'])->name('loans.toggleStatus');
+        Route::get('/pending', [LoansController::class, 'pending'])->name('loans.pending');
         Route::post('{id}/approve', [LoansController::class, 'approve'])->name('loans.approve');
+        Route::post('{id}/reject', [LoansController::class, 'reject'])->name('loans.reject');
     });
 
     // Guarantors
