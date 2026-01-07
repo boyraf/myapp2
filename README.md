@@ -1,59 +1,150 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+MyApp2 – Laravel SACCO Demo Application
+Project Overview
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+MyApp2 is a Laravel-based web application developed as a demo SACCO (Savings and Credit Cooperative Organization) system. The project was created to showcase my skills and knowledge of Laravel, including backend development, MVC architecture, database interaction, and view management.
 
-## About Laravel
+The system simulates key SACCO workflows such as:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Dashboard access for members and admins
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Loan application process for members
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Admin-side views for managing members, loans, and dashboard insights
 
-## Learning Laravel
+⚠️ Note: While admin and dashboard views are functional, the application currently does not integrate real payment services (MPESA, PayPal, Visa) — all financial transactions are simulated for demonstration purposes.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+The goal is demonstrative: to highlight Laravel development skills rather than operate as a full production SACCO system.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Key Features
+Member-side
 
-## Laravel Sponsors
+Dashboard view (basic overview of account and loans)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Loan application form
 
-### Premium Partners
+Admin-side
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Manage members
 
-## Contributing
+View loan applications
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Dashboard with summary statistics
 
-## Code of Conduct
+Technical Highlights
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Backend: Laravel 10, PHP 8.x
 
-## Security Vulnerabilities
+Database: Microsoft SQL Server (SQLSRV)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Frontend: Blade templating engine, basic HTML/CSS
 
-## License
+Architecture: MVC (Models, Views, Controllers)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Database Interaction: Eloquent ORM
+
+Validation: Laravel request validation for forms
+
+Environment Management: Fully configurable .env for database and optional services
+
+Project Purpose
+
+This project demonstrates my ability to:
+
+Develop a full-stack Laravel application from scratch
+
+Apply MVC principles and organize controllers, models, and views
+
+Implement CRUD operations and data validation using Eloquent
+
+Configure Laravel to work with SQL Server (SSMS) and environment-based settings
+
+Prepare an application structure that can easily integrate real payment systems in the future
+
+This is primarily a skills demonstration project for the company’s SACCO domain.
+
+Limitations
+
+Payment integrations (MPESA, PayPal, Visa) are not implemented; monetary actions are simulated
+
+Member views beyond the dashboard and loan application are mostly placeholders
+
+Security features (authentication/authorization) are basic; not production-ready
+
+Styling/UI is minimal; focus is on backend functionality
+
+Installation & Setup
+
+Follow these steps to run the project locally:
+
+1. Clone the repository
+git clone https://github.com/boyraf/myapp2.git
+cd myapp2
+
+2. Install PHP dependencies
+composer install
+
+3. Install frontend dependencies (if applicable)
+npm install
+npm run dev
+
+4. Configure environment variables
+
+Copy .env.example to .env
+
+cp .env.example .env
+
+
+Update database settings for SQL Server (or another database):
+
+DB_CONNECTION=sqlsrv
+DB_HOST=127.0.0.1
+DB_PORT=1433
+DB_DATABASE=myapp2
+DB_USERNAME=sa
+DB_PASSWORD=yourpassword
+
+
+Optional: Adjust other environment variables such as APP_URL, MAIL, etc.
+
+5. Generate Laravel application key
+php artisan key:generate
+
+6. Run database migrations
+php artisan migrate
+
+
+Optional: Run seeders if provided
+
+7. Serve the application
+php artisan serve
+
+
+Visit http://127.0.0.1:8000 in your browser
+
+8. Optional Testing
+
+If you have tests included:
+
+php artisan test
+
+Recommended Usage
+
+Login as admin to explore all management dashboards
+
+Login as member to access the dashboard and simulate loan application
+
+Use this project to review Laravel code structure, database interactions, and MVC implementation
+
+Future Enhancements (Optional)
+
+Integrate real payment gateways (MPESA, PayPal, Visa)
+
+Complete member views (statements, savings tracking, loan history)
+
+Add role-based authentication and authorization
+
+Improve frontend styling and UX
+
+License
+
+This project is for educational and internship demonstration purposes. Not for commercial use.
